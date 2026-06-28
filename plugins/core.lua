@@ -273,7 +273,7 @@ return {
                         col = "50%",
                     },
                     size = {
-                        width = 120,
+                        width = 0.6,
                         height = "auto",
                     },
                     border = {

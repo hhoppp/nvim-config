@@ -74,6 +74,34 @@ map("n", "<leader>fr", "<cmd>Telescope resume<cr>", desc("Resume last picker"))
 map("n", "<leader>fo", "<cmd>Telescope oldfiles<cr>", desc("Recent files"))
 map("n", "<leader>fw", "<cmd>Telescope grep_string<cr>", desc("Grep word under cursor"))
 map("n", "<leader>fk", "<cmd>Telescope keymaps<cr>", desc("Find keyword"))
+-- 查看/跳转标记
+map("n", "<leader>fm", function()
+    require("telescope.builtin").marks({
+        attach_mappings = function(prompt_bufnr, _)
+            local actions = require("telescope.actions")
+            local state = require("telescope.actions.state")
+            vim.api.nvim_buf_set_keymap(prompt_bufnr, "i", "<A-d>", "", {
+                noremap = true,
+                callback = function()
+                    local selection = state.get_selected_entry()
+                    if selection then
+                        -- 从显示文本提取标记名：如 "'a"
+                        local value = selection.value or selection[1] or ""
+                        local mark = value:match("'(%w)")
+                        if mark then
+                            vim.fn.delmark("'" .. mark)
+                            local picker = state.get_current_picker(prompt_bufnr)
+                            if picker then
+                                picker:refresh(picker.finder, {})
+                            end
+                        end
+                    end
+                end,
+            })
+            return true
+        end,
+    })
+end, desc("Find marks"))
 -- 按路径模糊搜索文件（telescope-file-browser）
 -- 插入模式快捷键：
 --   Alt+d  删除（移到回收站）   Alt+r  重命名
