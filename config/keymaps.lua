@@ -32,6 +32,8 @@ map("t", "<A-d>", "<cmd>ToggleTerm<cr>", desc("Toggle terminal"))
 -- 终端模式：Esc 退出到普通模式
 map("t", "<Esc>", "<C-\\><C-n>", { desc = "Exit terminal mode" })
 
+map("t", "<C-[>", "<C-\\><C-n>", { desc = "Exit terminal mode" })
+
 -- ============================================================================
 --  会话管理
 -- ============================================================================
@@ -54,8 +56,8 @@ end, desc("Save workspace"))
 --  标签页
 -- ============================================================================
 
-map("n", "<leader>tn", "<cmd>tabn<cr>",   desc("Next tab"))
-map("n", "<leader>tp", "<cmd>tabp<cr>",   desc("Previous tab"))
+map("n", "<leader>tn", "<cmd>tabn<cr>", desc("Next tab"))
+map("n", "<leader>tp", "<cmd>tabp<cr>", desc("Previous tab"))
 map("n", "<leader>tc", "<cmd>tabnew<cr>", desc("Create tab"))
 map("n", "<leader>td", "<cmd>tabclose<cr>", desc("Close tab"))
 map("n", "<leader>to", "<cmd>tabonly<cr>", desc("Close other tabs"))
