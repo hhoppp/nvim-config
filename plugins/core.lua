@@ -380,12 +380,12 @@ return {
                 },
             }
 
-            -- C/C++: 需要安装 codelldb
+            -- C/C++: 通过 Mason 安装 codelldb
             dap.adapters.codelldb = {
                 type = "server",
                 port = "${port}",
                 executable = {
-                    command = "codelldb",
+                    command = vim.fn.stdpath("data") .. "/mason/bin/codelldb",
                     args = { "--port", "${port}" },
                 },
             }
