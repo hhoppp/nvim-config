@@ -142,10 +142,6 @@ map({ "n", "t" }, "<C-k>", "<C-w>k", desc("Go to up window"))
 map({ "n", "t" }, "<C-l>", "<C-w>l", desc("Go to right window"))
 
 -- 窗口大小调整（niri 风格：Alt + hjkl）
-map("i", "<A-h>", "<Left>", desc("Left"))
-map("i", "<A-l>", "<Right>", desc("Right"))
-map("i", "<A-j>", "<Down>", desc("Down"))
-map("i", "<A-k>", "<Up>", desc("Up"))
 map("n", "<A-S-h>", "<C-w><", desc("Decrease width ×5"))
 map("n", "<A-S-l>", "<C-w>>", desc("Increase width ×5"))
 map("n", "<A-S-j>", "<C-w>-", desc("Decrease height ×5"))
@@ -255,6 +251,35 @@ map("n", "<leader>hr", function()
 end, desc("Reset hunk"))
 
 -- ============================================================================
+--  调试 (nvim-dap)
+-- ============================================================================
+
+map("n", "<F5>", function()
+    require("dap").continue()
+end, desc("Debug continue"))
+map("n", "<F10>", function()
+    require("dap").step_over()
+end, desc("Debug step over"))
+map("n", "<F11>", function()
+    require("dap").step_into()
+end, desc("Debug step into"))
+map("n", "<F12>", function()
+    require("dap").step_out()
+end, desc("Debug step out"))
+map("n", "<leader>db", function()
+    require("dap").toggle_breakpoint()
+end, desc("Toggle breakpoint"))
+map("n", "<leader>dB", function()
+    require("dap").set_breakpoint(vim.fn.input("Breakpoint condition: "))
+end, desc("Set conditional breakpoint"))
+map("n", "<leader>dc", function()
+    require("dap").continue()
+end, desc("Start/continue"))
+map("n", "<leader>di", function()
+    require("dapui").toggle()
+end, desc("Toggle debug UI"))
+
+-- ============================================================================
 --  LSP / 代码导航
 -- ============================================================================
 
@@ -335,3 +360,13 @@ end, desc("Toggle global lock"))
 -- ============================================================================
 --  自定义快捷键可追加在此 ↓
 -- ============================================================================
+
+--  输入模式下光标移动
+map("i", "<A-h>", "<Left>", desc("Left"))
+map("i", "<A-l>", "<Right>", desc("Right"))
+map("i", "<A-j>", "<Down>", desc("Down"))
+map("i", "<A-k>", "<Up>", desc("Up"))
+
+--  输入模式下退格与删除快捷键
+map("i", "<C-x>", "<C-h>", desc("Delete char before cursor"))
+map("i", "<C-b>", "<Del>", desc("Delete char after cursor"))

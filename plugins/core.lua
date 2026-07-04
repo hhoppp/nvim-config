@@ -206,7 +206,7 @@ return {
         },
         config = function(_, opts)
             require("persistence").setup(opts)
-            require("persistence").stop()    -- 关闭自动保存
+            require("persistence").stop() -- 关闭自动保存
         end,
     },
 
@@ -232,7 +232,7 @@ return {
     {
         "rcarriga/nvim-notify",
         opts = {
-            background_colour = "#000000",
+            background_colour = "NONE",
             timeout = 3000,
             position = "top-right",
             icons = {
@@ -269,7 +269,7 @@ return {
             views = {
                 cmdline_popup = {
                     position = {
-                        row = "25%",  -- 稍微高一点
+                        row = "25%", -- 稍微高一点
                         col = "50%",
                     },
                     size = {
@@ -345,6 +345,63 @@ return {
         cmd = "Telescope file_browser",
         config = function()
             require("telescope").load_extension("file_browser")
+        end,
+    },
+
+    -- ======== 调试器 nvim-dap ========
+    {
+        "mfussenegger/nvim-dap",
+        dependencies = {
+            { "rcarriga/nvim-dap-ui", dependencies = { "nvim-neotest/nvim-nio" } },
+        },
+        config = function()
+            local dap = require("dap")
+            local dapui = require("dapui")
+            dapui.setup()
+
+            -- 调试时自动打开/关闭 UI
+            dap.listeners.after.event_initialized["dapui_config"] = dapui.open
+            dap.listeners.after.event_terminated["dapui_config"] = dapui.close
+            dap.listeners.after.event_exited["dapui_config"] = dapui.close
+
+            -- 语言适配器
+            -- Python: 需要安装 debugpy
+            dap.adapters.python = {
+                type = "executable",
+                command = "python3",
+                args = { "-m", "debugpy.adapter" },
+            }
+            dap.configurations.python = {
+                {
+                    type = "python",
+                    request = "launch",
+                    name = "Launch file",
+                    program = "${file}",
+                },
+            }
+
+            -- C/C++: 需要安装 codelldb
+            dap.adapters.codelldb = {
+                type = "server",
+                port = "${port}",
+                executable = {
+                    command = "codelldb",
+                    args = { "--port", "${port}" },
+                },
+            }
+            dap.configurations.c = {
+                {
+                    name = "Launch",
+                    type = "codelldb",
+                    request = "launch",
+                    program = function()
+                        return vim.fn.input("Path to executable: ", vim.fn.getcwd() .. "/", "file")
+                    end,
+                    cwd = "${workspaceFolder}",
+                },
+            }
+            dap.configurations.cpp = dap.configurations.c
+            dap.configurations.rust = dap.configurations.c
         end,
     },
 
@@ -781,7 +838,6 @@ return {
                     source = true,
                 },
             })
-
         end,
     },
 
