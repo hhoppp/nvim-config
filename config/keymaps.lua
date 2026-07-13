@@ -76,6 +76,8 @@ map("n", "<leader>fr", "<cmd>Telescope resume<cr>", desc("Resume last picker"))
 map("n", "<leader>fo", "<cmd>Telescope oldfiles<cr>", desc("Recent files"))
 map("n", "<leader>fw", "<cmd>Telescope grep_string<cr>", desc("Grep word under cursor"))
 map("n", "<leader>fk", "<cmd>Telescope keymaps<cr>", desc("Find keyword"))
+-- 查看消息历史（noice）
+map("n", "<leader>on", "<cmd>Noice<cr>", desc("Open message history"))
 -- 查看/跳转标记
 map("n", "<leader>fm", function()
     require("telescope.builtin").marks({
@@ -278,6 +280,12 @@ end, desc("Start/continue"))
 map("n", "<leader>di", function()
     require("dapui").toggle()
 end, desc("Toggle debug UI"))
+map("n", "<leader>dE", function()
+    require("dap").terminate()
+end, desc("Debug terminate"))
+map("n", "<leader>dr", function()
+    require("dap").restart()
+end, desc("Debug restart"))
 
 -- ============================================================================
 --  LSP / 代码导航

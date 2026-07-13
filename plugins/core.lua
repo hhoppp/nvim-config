@@ -232,7 +232,7 @@ return {
     {
         "rcarriga/nvim-notify",
         opts = {
-            background_colour = "NONE",
+            background_colour = "#000000",
             timeout = 3000,
             position = "top-right",
             icons = {
@@ -380,24 +380,20 @@ return {
                 },
             }
 
-            -- C/C++: 通过 Mason 安装 codelldb
-            dap.adapters.codelldb = {
-                type = "server",
-                port = "${port}",
-                executable = {
-                    command = vim.fn.stdpath("data") .. "/mason/bin/codelldb",
-                    args = { "--port", "${port}" },
-                },
+            -- C/C++: 通过 stdio 通信，绕开端口问题
+            dap.adapters.lldb = {
+                type = "executable",
+                command = "/usr/bin/lldb-dap",
             }
             dap.configurations.c = {
                 {
                     name = "Launch",
-                    type = "codelldb",
+                    type = "lldb",
                     request = "launch",
                     program = function()
                         return vim.fn.input("Path to executable: ", vim.fn.getcwd() .. "/", "file")
                     end,
-                    cwd = "${workspaceFolder}",
+                    cwd = vim.fn.getcwd,
                 },
             }
             dap.configurations.cpp = dap.configurations.c
