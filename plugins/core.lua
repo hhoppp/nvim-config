@@ -183,6 +183,166 @@ return {
         main = "ibl",
     },
 
+    -- Markdown 内联渲染（在 buffer 内直接渲染标题/代码块/列表等）
+    -- 打开 .md 文件后无需任何操作，自动将 Markdown 语法渲染为美观的富文本显示
+    -- 编辑时渲染实时更新，不影响源文件内容
+    {
+        "MeanderingProgrammer/render-markdown.nvim",
+        -- 仅在打开 markdown / quarto 文件时加载
+        ft = { "markdown", "quarto" },
+        dependencies = {
+            "nvim-tree/nvim-web-devicons", -- 语言/文件图标
+        },
+        opts = {
+            -- ===== 渲染引擎 =====
+            -- 默认使用 treesitter 解析 Markdown 语法树，精确渲染
+            -- 如遇渲染问题可回退到 regex 模式
+            -- parser = "mixed",  -- "tree-sitter" | "regex" | "mixed"
+
+            -- ===== 标题渲染 =====
+            heading = {
+                -- 标题前显示图标（󰲡 󰲣 󰲥 󰲧 󰲩 󰲫）
+                icons = { "󰲡", "󰲣", "󰲥", "󰲧", "󰲩", "󰲫" },
+                -- 标题位置：左对齐（"overlay"）、行首（"icon"）、或与文本同位置
+                position = "overlay",
+                -- 标题行背景色高亮宽度
+                -- "full" = 整行, "column" = 仅标题区域
+                backgrounds = { "column", "column", "column", "column", "column", "column" },
+                -- 标题左边框（竖线或圆点）
+                left_pad = 2,
+                right_pad = 2,
+            },
+
+            -- ===== 代码块渲染 =====
+            code = {
+                -- 代码块右上角显示语言名称（如 "lua", "python"）
+                sign = true,
+                -- 代码块左上角显示语言图标
+                -- 需要 nvim-web-devicons 支持
+                language_icon = true,
+                -- 代码块背景色高亮
+                highlight = "RenderMarkdownCode",
+                -- 代码块左侧边框样式
+                left_pad = 2,
+                right_pad = 2,
+                -- 代码块上方/下方空白行
+                above = "▔",
+                below = "▁",
+                -- 禁用代码块的宽度限制（默认 0 = 不限制）
+                width = "block", -- "block" | "full" | number
+            },
+
+            -- ===== 行内代码渲染 =====
+            inline_code = {
+                -- 行内代码使用 ` 包裹的文本高亮背景
+                highlight = "RenderMarkdownCode",
+            },
+
+            -- ===== 列表符号 =====
+            bullet = {
+                -- 无序列表符号： - * + 分别映射为以下图标
+                icons = { "●", "○", "◆" },
+                -- 左侧内边距
+                left_pad = 2,
+                right_pad = 2,
+            },
+
+            -- ===== 复选框 =====
+            checklist = {
+                -- 未勾选 [ ] → 󰄱，已勾选 [x] → 󰱒
+                unchecked = { icon = "󰄱", highlight = "RenderMarkdownUnchecked" },
+                checked   = { icon = "󰱒", highlight = "RenderMarkdownChecked" },
+                -- 复选框左侧内边距
+                left_pad = 2,
+                right_pad = 2,
+            },
+
+            -- ===== 引用块 =====
+            quote = {
+                -- 引用行左侧竖线颜色（跟随 tokyonight 配色）
+                -- 设为空则使用默认高亮组
+                icon = "▍",
+                -- 左侧内边距
+                left_pad = 2,
+                right_pad = 2,
+                -- 引用块是否重复图标行
+                repeat_icon = false,
+                -- 空引用行是否仍显示图标
+                empty_line_icon = false,
+            },
+
+            -- ===== 表格渲染 =====
+            pipe_table = {
+                -- 表格对齐方式指示器（:--- | :--: | ---:）
+                -- 渲染为对应方向的图标
+                alignment_indicator = "▕",
+                -- 表格左侧内边距
+                left_pad = 2,
+                right_pad = 2,
+            },
+
+            -- ===== LaTeX 数学公式 =====
+            -- 需要安装 latex 相关工具，默认关闭
+            -- latex = {
+            --     enabled = false,
+            -- },
+
+            -- ===== 链接/图片渲染 =====
+            link = {
+                -- 超链接显示图标
+                icon = "󰌹",
+                -- 图片链接显示图标
+                image_icon = "󰉋",
+                -- 是否加下划线
+                underline = true,
+                -- 是否在链接后显示括号中的 URL
+                -- show_url = false,
+                -- 左侧内边距
+                left_pad = 2,
+                right_pad = 2,
+            },
+
+            -- ===== 分隔线 =====
+            dash = {
+                -- --- 分隔线渲染为图标
+                icon = "─",
+                -- 重复次数
+                repeat_count = 3,
+                -- 左侧内边距
+                left_pad = 2,
+                right_pad = 2,
+            },
+
+            -- ===== 折叠标记 =====
+            fold = {
+                -- 可折叠标题/列表的展开/收起图标
+                enabled = true,
+            },
+
+            -- ===== 抗锯齿（性能相关） =====
+            -- 使用双倍宽度的虚拟文本减少锯齿感
+            anti_conceal = {
+                enabled = true,
+            },
+
+            -- ===== 渲染延迟 =====
+            -- 输入停止后等待多少毫秒再渲染（减少闪烁）
+            render_priority = {
+                -- 高优先级（输入停止后立即渲染）
+                -- 低优先级（滚动/切换 buffer 时延迟）
+            },
+        },
+        -- 可选：自定义高亮组覆盖（适配 tokyonight 主题）
+        config = function(_, opts)
+            require("render-markdown").setup(opts)
+
+            -- 适配透明背景：将渲染高亮组背景设为 NONE
+            -- 如果你使用了 transparent.nvim，推荐启用以下设置
+            vim.api.nvim_set_hl(0, "RenderMarkdownCode",       { bg = "NONE" })
+            vim.api.nvim_set_hl(0, "RenderMarkdownCodeInline", { bg = "NONE" })
+        end,
+    },
+
     -- 文件图标 (让文件树、状态栏等显示图标)
     { "nvim-tree/nvim-web-devicons", lazy = true },
 
@@ -415,14 +575,6 @@ return {
     },
 
     -- 代码注释
-    {
-        "numToStr/Comment.nvim",
-        keys = {
-            { "gc", mode = { "n", "v" }, desc = "Toggle comment" },
-        },
-        opts = {},
-    },
-
     -- 自动补全括号/引号
     { "windwp/nvim-autopairs",       event = "InsertEnter", opts = {} },
 
@@ -451,7 +603,7 @@ return {
         opts = {
             ensure_installed = {
                 "lua", "vim", "vimdoc", "query", "markdown", "javascript", "typescript",
-                "python", "go", "rust", "c", "cpp", "html", "css",
+                "python", "go", "rust", "c", "cpp", "html", "css", "toml",
             },
             highlight = { enable = true },
             indent = { enable = true },

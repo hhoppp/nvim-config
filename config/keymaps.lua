@@ -197,7 +197,7 @@ map("i", "<C-z>", "<Esc>ui", desc("Undo"))
 -- Ctrl+E 关闭（插入模式）
 -- map("i", "<C-e>", "<Esc>a", desc("Hide"))
 
--- 注释切换 (gc) — 定义在 plugins/core.lua Comment.nvim 中（操作符映射，需插件加载）
+-- 注释切换 (gc/gcc) — Neovim 内置注释（详见 :help gcc）
 -- 包围符号 (ys/cs/ds) — 定义在 plugins/core.lua nvim-surround 中（同上）
 
 -- 自动补全菜单 (blink.cmp)
@@ -353,6 +353,16 @@ map("n", "<leader>a", "<cmd>Alpha<CR>", desc("Dashboard / Welcome"))
 -- ============================================================================
 
 map("n", "<leader>TT", "<cmd>TransparentToggle<cr>", desc("Toggle transparent"))
+
+-- ============================================================================
+--  Markdown 渲染开关
+-- ============================================================================
+
+-- render-markdown.nvim 内联渲染开关，在 Markdown 文件中切换是否显示渲染效果
+-- 关闭后恢复纯文本显示，不影响源文件
+map("n", "<leader>rdm", function()
+    require("render-markdown").toggle()
+end, desc("Toggle markdown render"))
 
 -- ============================================================================
 --  全局锁定（modlock）
