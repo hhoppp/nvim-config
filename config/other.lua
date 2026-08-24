@@ -47,7 +47,7 @@ function M.reload_config()
     for _, mod in ipairs(modules) do
         package.loaded[mod] = nil
     end
-    vim.cmd("luafile /home/alise/.config/nvim/init.lua")
+    vim.cmd("luafile " .. vim.fn.stdpath("config") .. "/init.lua")
     -- 重载后关闭搜索高亮
     vim.cmd("noh")
     vim.notify("配置已热加载", vim.log.levels.INFO)
