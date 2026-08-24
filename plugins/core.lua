@@ -186,7 +186,11 @@ return {
                     { filetype = "NvimTree", text = "File Explorer", padding = 1 },
                 },
                 show_close_icon = false,
-                separator_style = "slant",
+                separator_style = "thin",
+                indicator = {
+                    icon = "▎",
+                    style = "underline",
+                },
             },
         },
         config = function(_, opts)
