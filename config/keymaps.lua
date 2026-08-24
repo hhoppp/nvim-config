@@ -48,7 +48,7 @@ map("n", "<leader>fq", function()
     local encoded = dir:gsub("/", "%%")
     local file = vim.fn.stdpath("state") .. "/sessions/" .. encoded .. ".vim"
     vim.fn.mkdir(vim.fn.stdpath("state") .. "/sessions", "p")
-    vim.cmd("mksession! " .. vim.fn.fnameescape(file))
+    require("config.other").save_workspace(file)
     vim.notify("工作区已保存", vim.log.levels.INFO)
 end, desc("Save workspace"))
 

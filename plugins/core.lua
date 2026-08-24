@@ -191,6 +191,12 @@ return {
                     icon = "▎",
                     style = "underline",
                 },
+                -- 点击 ✕ / 右键关闭 buffer 时安全删除：
+                -- 先把显示该 buffer 的窗口切换到其他 buffer，再删除，
+                -- 避免 bdelete 把 nvim-tree 窗口挤掉
+                close_command = function(buf)
+                    require("config.bufops").close_buffer_safe(buf)
+                end,
             },
         },
         config = function(_, opts)
@@ -385,7 +391,7 @@ return {
         },
     },
 
-    -- 工作区会话管理（自动保存/恢复打开的缓冲区）
+    -- 工作区会话管理（手动保存/恢复打开的缓冲区）
     {
         "folke/persistence.nvim",
         event = "VeryLazy",
