@@ -172,6 +172,30 @@ return {
         end,
     },
 
+    -- Buffer 标签栏（VSCode 风格）
+    {
+        "akinsho/bufferline.nvim",
+        event = "VeryLazy",
+        version = "*",
+        dependencies = { "nvim-tree/nvim-web-devicons" },
+        opts = {
+            options = {
+                mode = "buffers",
+                diagnostics = "nvim_lsp",
+                offsets = {
+                    { filetype = "NvimTree", text = "File Explorer", padding = 1 },
+                },
+                show_close_icon = false,
+                separator_style = "slant",
+            },
+        },
+        config = function(_, opts)
+            require("bufferline").setup(opts)
+            -- 与透明主题配合：标签栏背景透明
+            vim.api.nvim_set_hl(0, "BufferLineFill", { bg = "NONE" })
+        end,
+    },
+
     -- 缩进指示线
     {
         "lukas-reineke/indent-blankline.nvim",
