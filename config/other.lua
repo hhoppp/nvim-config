@@ -140,13 +140,20 @@ function M.restore_tree_state(session_file)
             return
         end
 
-        -- 内部：应用树状态（过滤 + 展开 + 聚焦），带重试
+        -- 内部：应用树状态（过滤 + 展开 + 聚焦）
+        local applied = false
+        local in_progress = false
         local attempts = 0
         local function apply_state()
+            if applied or in_progress then
+                return
+            end
+            in_progress = true
             attempts = attempts + 1
             local explorer = require("nvim-tree.core").get_explorer()
             if not explorer then
-                if attempts < 20 then
+                if attempts < 40 then
+                    in_progress = false
                     vim.defer_fn(apply_state, 50)
                 end
                 return
@@ -183,18 +190,35 @@ function M.restore_tree_state(session_file)
                         all_done = false
                     end
                 end
-                -- 目录还没就绪则重试
-                if not all_done and attempts < 20 then
-                    vim.defer_fn(apply_state, 100)
-                    return
+                -- 关键：展开后必须重绘，否则 GUI 显示不刷新
+                if all_done and explorer.renderer then
+                    explorer.renderer:draw()
+                end
+                -- 目录还没就绪则稍后重试
+                if not all_done then
+                    if attempts < 40 then
+                        in_progress = false
+                        vim.defer_fn(apply_state, 100)
+                        return
+                    end
                 end
             end
 
-            -- 最后聚焦到保存时的文件
+            applied = true
+            in_progress = false
+
+            -- 在树中定位保存时的文件（不抢焦点）
             if state.focused and state.focused ~= "" then
                 pcall(function()
-                    api.tree.find_file({ path = state.focused, open = true, focus = true })
+                    api.tree.find_file({ path = state.focused, open = true, focus = false })
                 end)
+            end
+            -- 最后把焦点放回显示该文件的窗口，保留 mksession 恢复的光标行
+            if state.focused and state.focused ~= "" then
+                local target_win = vim.fn.bufwinid(vim.fn.bufnr(state.focused))
+                if target_win and target_win > 0 then
+                    pcall(vim.api.nvim_set_current_win, target_win)
+                end
             end
         end
 
@@ -231,8 +255,18 @@ function M.restore_tree_state(session_file)
             api.tree.open({ path = state.cwd })
         end
 
-        -- 等树就绪后应用状态
-        vim.defer_fn(apply_state, 100)
+        -- 树渲染完成后应用状态（TreeRendered 事件驱动，时序最可靠）
+        local ok_sub, _ = pcall(function()
+            api.events.subscribe(api.events.Event.TreeRendered, function()
+                apply_state()
+            end)
+        end)
+        -- 兜底：事件未触发时也尝试（open 后 300ms 起，最多 40 次重试）
+        if ok_sub then
+            vim.defer_fn(apply_state, 300)
+        else
+            vim.defer_fn(apply_state, 100)
+        end
     end)
 end
 
