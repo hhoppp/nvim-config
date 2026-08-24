@@ -320,7 +320,7 @@ function M.cleanup_stale_sessions()
     local removed = 0
     for _, file in ipairs(files) do
         local name = vim.fn.fnamemodify(file, ":t"):gsub("%.vim$", "")
-        -- 解码会话文件名：%home%alise%a → /home/alise/a
+        -- 解码会话文件名：%home%xxx%yyy → /home/xxx/yyy
         local dir = name:gsub("%%", "/")
         if dir ~= "" and vim.fn.isdirectory(dir) == 0 then
             os.remove(file)

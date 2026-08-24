@@ -51,7 +51,7 @@ map("n", "<leader>fs", function()
 end, desc("Select session"))
 map("n", "<leader>fq", function()
     local dir = vim.fn.getcwd()
-    -- 把 /home/alise/... 编码为 %home%alise%...
+    -- 把绝对路径编码为会话文件名：/home/xxx/yyy → %home%xxx%yyy.vim
     local encoded = dir:gsub("/", "%%")
     local file = vim.fn.stdpath("state") .. "/sessions/" .. encoded .. ".vim"
     vim.fn.mkdir(vim.fn.stdpath("state") .. "/sessions", "p")
