@@ -17,6 +17,9 @@ end
 map("n", "<leader>e", "<cmd>NvimTreeToggle<cr>", desc("Toggle file explorer"))
 
 -- 终端（互斥模式：每次只显示一个窗口）
+-- 高度/宽度为原始值的 2/3：
+--   th 高度 20 → 13（水平终端），tv 宽度 75 → 50（垂直终端）
+-- Alt+d 默认打开水平终端（th），而非 toggleterm 默认的居中 float 终端
 map("n", "<leader>tf", function()
     require("config.other").toggle_term(1, "float")
 end, desc("Terminal float"))
