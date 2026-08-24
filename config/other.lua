@@ -5,6 +5,32 @@
 
 local M = {}
 
+-- toggleterm 打开前的主窗口视图（供 on_open 恢复，消除闪烁/偏移）
+M._main_view = nil
+M._main_win = nil
+
+---记录当前主窗口视图（toggle_term 打开 split 终端前调用）
+function M.record_main_view()
+    local win = vim.api.nvim_get_current_win()
+    local buf = vim.api.nvim_win_get_buf(win)
+    if vim.bo[buf].buftype ~= "terminal" and vim.fn.win_gettype(win) == "" then
+        M._main_view = vim.fn.winsaveview()
+        M._main_win = win
+    end
+end
+
+---恢复主窗口视图（toggleterm on_open 回调中调用）
+function M.restore_main_view()
+    if M._main_win and vim.api.nvim_win_is_valid(M._main_win) and M._main_view then
+        vim.api.nvim_win_call(M._main_win, function()
+            vim.fn.winrestview(M._main_view)
+        end)
+    end
+    -- 用完即清，避免下次误恢复
+    M._main_view = nil
+    M._main_win = nil
+end
+
 ---热刷新 Neovim 配置
 ---清空 config.* 模块缓存后重新加载 init.lua
 function M.reload_config()
@@ -22,10 +48,16 @@ function M.reload_config()
 end
 
 ---切换终端（互斥模式：先关其他终端，再打开指定终端）
+---打开/关闭 split 终端时保存并恢复主窗口视图，避免内容晃动
 ---@param id number 终端 ID
 ---@param direction string 方向：float / horizontal / vertical
 ---@param size number|nil 尺寸
 function M.toggle_term(id, direction, size)
+    -- 记录主窗口视图（split 方向才需要；float 不影响布局）
+    if direction ~= "float" then
+        M.record_main_view()
+    end
+
     -- 先关闭其他打开的 toggleterm 终端
     for _, buf in ipairs(vim.api.nvim_list_bufs()) do
         if vim.api.nvim_buf_is_valid(buf) and vim.bo[buf].buftype == "terminal" then
@@ -40,6 +72,7 @@ function M.toggle_term(id, direction, size)
     end
     -- 打开目标终端（存在则 toggle，不存在则创建）
     vim.cmd(string.format("%dToggleTerm direction=%s%s", id, direction, size and (" size=" .. size) or ""))
+
 end
 
 ---用 Telescope 列出并选择会话

@@ -419,6 +419,11 @@ return {
                 width = 90,
                 height = 30,
             },
+            -- 终端打开完成（buffer 就绪）后恢复主窗口视图，消除闪烁/偏移。
+            -- 在 toggleterm 内部调用，时机比 WinNew/TermOpen 事件更可靠
+            on_open = function()
+                require("config.other").restore_main_view()
+            end,
         },
     },
 
