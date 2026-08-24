@@ -176,7 +176,7 @@ end, desc("Close all buffers"))
 -- ============================================================================
 map("n", "<leader>w", "<cmd>write<cr>", desc("Save"))
 map("n", "<leader>q", "<cmd>quit<cr>", desc("Quit"))
-map("n", "<leader>Q", "<cmd>q!<cr>", desc("Quit!"))
+map("n", "<leader>Q", "<cmd>qa<cr>", desc("Quit all"))
 -- map("n", "<leader>x", "<cmd>x<cr>", desc("Save and quit"))
 
 -- ============================================================================
