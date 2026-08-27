@@ -41,7 +41,7 @@ end
 ---清空 config.* 模块缓存后重新加载 init.lua
 function M.reload_config()
     local modules = {
-        "config.options", "config.keymaps", "config.modlock",
+        "config.options", "config.keymaps",
         "config.bufops", "config.transparent", "config.other",
     }
     for _, mod in ipairs(modules) do
@@ -79,7 +79,6 @@ function M.toggle_term(id, direction, size)
     end
     -- 打开目标终端（存在则 toggle，不存在则创建）
     vim.cmd(string.format("%dToggleTerm direction=%s%s", id, direction, size and (" size=" .. size) or ""))
-
 end
 
 ---用 Telescope 列出并选择会话
@@ -95,8 +94,8 @@ function M.save_tree_state(session_file)
         visible = api.tree.is_visible(),
         cwd = vim.fn.getcwd(),
         focused = "",
-        expanded = {},   -- 展开的目录列表
-        filters = nil,   -- 过滤状态（dotfiles / git_ignored 等）
+        expanded = {}, -- 展开的目录列表
+        filters = nil, -- 过滤状态（dotfiles / git_ignored 等）
     }
     if state.visible then
         -- 记录过滤开关状态（H: dotfiles, I: git_ignored 等）

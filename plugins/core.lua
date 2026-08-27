@@ -11,9 +11,11 @@ return {
         opts = {
             style = "night",
             transparent = true,
+            on_highlights = function(hl, colors)
+                hl.Normal.bg = colors.none
+            end,
         },
         config = function()
-            -- require("tokyonight").setup(opts)
             vim.cmd([[colorscheme tokyonight]])
         end,
     },
@@ -22,7 +24,7 @@ return {
     {
         "xiyaowong/transparent.nvim",
         lazy = false,
-        priority = 999,
+        priority = 1001,
         opts = {
             enable = true, -- 启动自动透明
             extra_groups = {
@@ -75,7 +77,7 @@ return {
 
     {
         "nvim-lualine/lualine.nvim",
-        event = "VeryLazy",
+        event = "VimEnter",
         dependencies = { "nvim-tree/nvim-web-devicons", lazy = true },
         config = function()
             local theme = require("lualine.themes.tokyonight")
@@ -175,7 +177,7 @@ return {
     -- Buffer 标签栏（VSCode 风格）
     {
         "akinsho/bufferline.nvim",
-        event = "VeryLazy",
+        event = "VimEnter",
         version = "*",
         dependencies = { "nvim-tree/nvim-web-devicons" },
         opts = {
@@ -365,6 +367,23 @@ return {
                 -- 高优先级（输入停止后立即渲染）
                 -- 低优先级（滚动/切换 buffer 时延迟）
             },
+
+            -- ===== Obsidian callout 图标化（参考 patricorgi/dotfiles）=====
+            -- 知识库常用的 callout 类型映射为图标 + 语义色
+            callout = {
+                note      = { raw = "[!NOTE]",      rendered = "󰋽 Note",      highlight = "RenderMarkdownInfo" },
+                tip       = { raw = "[!TIP]",       rendered = "󰌶 Tip",       highlight = "RenderMarkdownSuccess" },
+                important = { raw = "[!IMPORTANT]", rendered = "󰅾 Important", highlight = "RenderMarkdownHint" },
+                warning   = { raw = "[!WARNING]",   rendered = "󰀪 Warning",   highlight = "RenderMarkdownWarn" },
+                caution   = { raw = "[!CAUTION]",   rendered = "󰳦 Caution",   highlight = "RenderMarkdownError" },
+            },
+
+            -- ===== wikilink 高亮（[[文件名]]，配合 marksman 跳转）=====
+            -- 用 conceal 隐藏括号、给链接着色，观感接近 Obsidian 阅读模式
+            link = {
+                hyperlink = { icon = "󰌹" },
+                image     = { icon = "󰉋" },
+            },
         },
         -- 可选：自定义高亮组覆盖（适配 tokyonight 主题）
         config = function(_, opts)
@@ -492,6 +511,13 @@ return {
             lsp = {
                 progress = {
                     enabled = false,
+                },
+                -- 关闭自动弹出的函数签名浮窗（noice 默认 auto_open 开启，
+                -- 输入 ( 等触发字符会自动弹带边框的签名浮窗，见 noice 源码 config/init.lua）
+                signature = {
+                    auto_open = {
+                        enabled = false,
+                    },
                 },
                 override = {
                     "vim.lsp.util.convert_input_to_markdown",
@@ -705,29 +731,28 @@ return {
             keymap = {
                 -- preset = "default" 提供以下默认快捷键：
                 -- <C-y>   确认补全 (y = yes)
-                -- <C-e>   隐藏补全菜单
                 -- <C-n>/<C-p>  选择下一项/上一项
-                -- <C-space>  手动触发补全
+                -- <C-k>   显示/隐藏签名帮助
+                -- <Tab>/<S-Tab>  片段跳转
                 preset = "default",
 
                 -- 如果你习惯用 Tab 键，可以使用 "super-tab" preset：
                 -- preset = "super-tab",
 
-                -- 覆盖 <C-space> 为 toggle 功能
-                -- ["<C-space>"] = {
-                --     function()
-                --         local cmp = require("blink.cmp")
-                --         if vim.fn.pumvisible() == 1 then
-                --             cmp.hide()
-                --         else
-                --             cmp.show()
-                --             -- 可选：同时显示文档
-                --             -- vim.schedule(function() cmp.show_documentation() end)
-                --         end
-                --     end,
-                --     -- 如果菜单打开时按 <C-space>，也关闭文档（可选）
-                --     -- "hide_documentation",
-                -- },
+                -- <C-space> 覆盖为 toggle：显示/隐藏补全菜单
+                ["<C-space>"] = {
+                    function(cmp)
+                        if cmp.is_menu_visible() then
+                            cmp.hide()
+                        else
+                            cmp.show()
+                        end
+                        return true
+                    end,
+                },
+
+                -- <C-e> 移除 blink 绑定（不再用于关闭补全），恢复原生行为（向下滚动一行）
+                ["<C-e>"] = false,
 
                 -- 保留其他默认快捷键不变
 
@@ -735,7 +760,6 @@ return {
                 -- ["<C-y>"] = { "accept", "fallback" },
                 -- ["<C-n>"] = { "select_next", "fallback" },
                 -- ["<C-p>"] = { "select_prev", "fallback" },
-                -- ["<C-space>"] = { "show", "show_documentation", "hide_documentation" },
             },
 
             -- ===== 外观设置 =====
@@ -781,10 +805,13 @@ return {
                 trigger = {
                     -- 阻止输入关键字时自动弹出补全菜单 [citation:3]
                     show_on_keyword = false,
+                    -- 关闭触发字符（如 `(`, `.`, `:`）触发的自动补全
+                    -- 输入 `(` 等字符时不再弹出所有函数候选，仅 <C-space> 手动触发
+                    show_on_trigger_character = false,
+                    -- 进入插入模式时，光标停在触发字符后也不触发补全
+                    show_on_insert_on_trigger_character = false,
                     -- 可选：阻止特定字符（如 `.`, `:`）触发补全
                     -- show_on_x_blocked_trigger_characters = { '.', ':', '>' } [citation:3]
-                    -- 关闭按键自动触发补全，仅通过 <C-space> 等手动触发
-                    -- show_on_insert_on_trigger_character = false, -- 输入 . : -> 等字符时不触发
                     -- 在输入这些字符时自动触发补全
                     -- 如 . : -> :: 等
                 },
@@ -809,6 +836,18 @@ return {
             -- ===== 函数签名帮助 =====
             signature = {
                 enabled = true, -- 启用签名功能（供 <C-k> 快捷键使用）
+                trigger = {
+                    -- 关闭输入触发字符（如 `(`）时自动弹出签名窗口
+                    -- 仍可通过 <C-k> 手动呼出
+                    show_on_trigger_character = false,
+                    -- 进入插入模式时光标停在触发字符后也不自动弹出
+                    show_on_insert_on_trigger_character = false,
+                    -- 阻止在触发字符处自动显示。关键：接受补全项后 blink 会
+                    -- 无条件调用 show_if_on_trigger_character()（不检查上面
+                    -- 的 show_on_* 开关），只能用 blocked 字符拦截；
+                    -- <C-k> 手动呼出不走此检查，不受影响
+                    blocked_trigger_characters = { "(", "," },
+                },
                 window = {
                     -- 可选：签名窗口样式配置
                     -- border = "rounded",
@@ -871,11 +910,12 @@ return {
                 --   prepend_args = { "--config", "/path/to/.prettierrc" },
                 -- },
             },
-            -- 保存时自动格式化
-            format_on_save = {
-                timeout_ms = 500,
-                lsp_fallback = true,
-            },
+            -- 保存时自动格式化（已关闭：如需恢复，取消注释下方配置）
+            -- format_on_save = {
+            --     timeout_ms = 500,
+            --     lsp_fallback = true,
+            -- },
+            format_on_save = false,
         },
         -- 需要提前安装这些格式化工具（通过 Mason）
         dependencies = {
@@ -925,6 +965,7 @@ return {
                 "lua-language-server",        -- Lua
                 "pyright",                    -- Python
                 "typescript-language-server", -- TypeScript/JavaScript
+                "marksman",                   -- Markdown LSP：链接跳转/补全
             }
             for _, pkg_name in ipairs(packages) do
                 local ok, pkg = pcall(registry.get_package, pkg_name)
@@ -1012,6 +1053,7 @@ return {
             vim.lsp.enable("lua_ls")
             vim.lsp.enable("pyright")
             vim.lsp.enable("ts_ls")
+            vim.lsp.enable("marksman")
 
             -- ===== 诊断显示配置 =====
             pcall(vim.diagnostic.config, {

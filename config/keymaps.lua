@@ -84,7 +84,6 @@ map("n", "<leader>fo", "<cmd>Telescope oldfiles<cr>", desc("Recent files"))
 map("n", "<leader>fw", "<cmd>Telescope grep_string<cr>", desc("Grep word under cursor"))
 map("n", "<leader>fk", "<cmd>Telescope keymaps<cr>", desc("Find keyword"))
 -- 查看消息历史（noice）
-map("n", "<leader>on", "<cmd>Noice<cr>", desc("Open message history"))
 -- 查看/跳转标记
 map("n", "<leader>fm", function()
     require("telescope.builtin").marks({
@@ -132,8 +131,12 @@ map("n", "N", "Nzzzv", desc("Prev search result (center)"))
 map("n", "*", "*zzzv", desc("Search word under cursor (center)"))
 map("n", "#", "#zzzv", desc("Search word backward (center)"))
 
--- 清除搜索高亮
-map("n", "<leader>hl", "<cmd>nohlsearch<cr>", desc("Clear search highlight"))
+
+-- <leader>br: 将标签栏重排为 buffer 实际顺序（nvim_list_bufs 的 ID 顺序）
+map("n", "<leader>br", function()
+    local ok, cmds = pcall(require, "bufferline.commands")
+    if ok then cmds.sort_by("id") end
+end, desc("Reorder tabs to buffer ID order"))
 
 -- ============================================================================
 --  窗口管理
@@ -169,8 +172,18 @@ map("n", "<leader>s|", "<C-w>|", desc("Maximize width"))
 --  缓冲区管理
 -- ============================================================================
 
-map("n", "<leader>bn", "<cmd>bnext<cr>", desc("Next buffer"))
-map("n", "<leader>bp", "<cmd>bprevious<cr>", desc("Previous buffer"))
+-- bn/bp 跟 bufferline 的视觉顺序（与 bh/bl 移动后的标签顺序一致）
+map("n", "<leader>bn", function()
+    local ok, bl = pcall(require, "bufferline")
+    if ok then bl.cycle(1) else vim.cmd("bnext") end
+end, desc("Next buffer (follows tab order)"))
+map("n", "<leader>bp", function()
+    local ok, bl = pcall(require, "bufferline")
+    if ok then bl.cycle(-1) else vim.cmd("bprevious") end
+end, desc("Previous buffer (follows tab order)"))
+map("n", "<leader>bh", "<cmd>BufferLineMovePrev<cr>", desc("Move buffer left"))
+map("n", "<leader>bl", "<cmd>BufferLineMoveNext<cr>", desc("Move buffer right"))
+map("n", "<leader>bo", "<cmd>BufferLineCloseOthers<cr>", desc("Close other buffer"))
 map("n", "<leader>bd", function()
     require("config.bufops").close_current()
 end, desc("Close buffer"))
@@ -191,15 +204,15 @@ map("n", "<leader>Q", "<cmd>qa<cr>", desc("Quit all"))
 -- ============================================================================
 
 -- Ctrl+S 保存（插入模式）
-map("i", "<C-s>", function()
-    if vim.bo.modified then vim.cmd.write() end
-end, desc("Save"))
+-- map("i", "<C-s>", function()
+--     if vim.bo.modified then vim.cmd.write() end
+-- end, desc("Save"))
 
 -- Ctrl+V 粘贴（插入模式，从系统剪贴板）
-map("i", "<C-v>", "<C-r>+", desc("Paste"))
+-- map("i", "<C-v>", "<C-r>+", desc("Paste"))
 
 -- Ctrl+Z 撤销（插入模式，退出插入模式执行撤销）
-map("i", "<C-z>", "<Esc>ui", desc("Undo"))
+-- map("i", "<C-z>", "<Esc>ui", desc("Undo"))
 
 -- Ctrl+E 关闭（插入模式）
 -- map("i", "<C-e>", "<Esc>a", desc("Hide"))
@@ -218,13 +231,13 @@ map("i", "<C-z>", "<Esc>ui", desc("Undo"))
 --  格式化 (conform.nvim)
 -- ============================================================================
 
-map({ "n", "v" }, "<leader>cf", function()
-    require("conform").format({ async = true, lsp_fallback = true })
-end, desc("Format code"))
-
-map({ "n", "v" }, "<leader>cF", function()
-    require("conform").format({ formatters = { "injected" }, timeout_ms = 3000 })
-end, desc("Format Injected Langs"))
+-- map({ "n", "v" }, "<leader>cf", function()
+--     require("conform").format({ async = true, lsp_fallback = true })
+-- end, desc("Format code"))
+--
+-- map({ "n", "v" }, "<leader>cF", function()
+--     require("conform").format({ formatters = { "injected" }, timeout_ms = 3000 })
+-- end, desc("Format Injected Langs"))
 
 -- Shift+Alt+F 格式化（通用快捷键）
 map({ "n", "v", "i" }, "<A-S-f>", function()
@@ -235,29 +248,18 @@ end, desc("Format code"))
 --  Git (gitsigns.nvim)
 -- ============================================================================
 
-map("n", "]c", function()
-    if vim.bo.buftype == "" and package.loaded.gitsigns then
-        package.loaded.gitsigns.next_hunk()
-    end
-end, desc("Next hunk"))
+-- map("n", "]c", function()
+--     if vim.bo.buftype == "" and package.loaded.gitsigns then
+--         package.loaded.gitsigns.next_hunk()
+--     end
+-- end, desc("Next hunk"))
+--
+-- map("n", "[c", function()
+--     if vim.bo.buftype == "" and package.loaded.gitsigns then
+--         package.loaded.gitsigns.prev_hunk()
+--     end
+-- end, desc("Prev hunk"))
 
-map("n", "[c", function()
-    if vim.bo.buftype == "" and package.loaded.gitsigns then
-        package.loaded.gitsigns.prev_hunk()
-    end
-end, desc("Prev hunk"))
-
-map("n", "<leader>hs", function()
-    if package.loaded.gitsigns then
-        package.loaded.gitsigns.stage_hunk()
-    end
-end, desc("Stage hunk"))
-
-map("n", "<leader>hr", function()
-    if package.loaded.gitsigns then
-        package.loaded.gitsigns.reset_hunk()
-    end
-end, desc("Reset hunk"))
 
 -- ============================================================================
 --  调试 (nvim-dap)
@@ -307,8 +309,7 @@ map("n", "gI", vim.lsp.buf.implementation, desc("Go to implementation"))
 map("n", "K", vim.lsp.buf.hover, desc("Hover documentation"))
 
 -- 重构
-map("n", "<leader>rn", vim.lsp.buf.rename, desc("Rename symbol"))
-map("n", "<leader>ca", vim.lsp.buf.code_action, desc("Code actions"))
+-- map("n", "<leader>ca", vim.lsp.buf.code_action, desc("Code actions"))
 
 -- 格式化（LSP fallback，当 conform 不可用时）
 -- map("n", "<leader>f", function()
@@ -350,16 +351,10 @@ end, desc("Next (warn/error)"))
 --  map("n", "<leader>m", "<cmd>Mason<CR>", desc("Mason (LSP Manager)"))
 
 -- ============================================================================
---  欢迎界面
--- ============================================================================
-
-map("n", "<leader>a", "<cmd>Alpha<CR>", desc("Dashboard / Welcome"))
-
--- ============================================================================
 --  透明开关（由 xiyaowong/transparent.nvim 接管）
 -- ============================================================================
 
-map("n", "<leader>TT", "<cmd>TransparentToggle<cr>", desc("Toggle transparent"))
+-- map("n", "<leader>TT", "<cmd>TransparentToggle<cr>", desc("Toggle transparent"))
 
 -- ============================================================================
 --  Markdown 渲染开关
@@ -367,31 +362,20 @@ map("n", "<leader>TT", "<cmd>TransparentToggle<cr>", desc("Toggle transparent"))
 
 -- render-markdown.nvim 内联渲染开关，在 Markdown 文件中切换是否显示渲染效果
 -- 关闭后恢复纯文本显示，不影响源文件
-map("n", "<leader>rdm", function()
-    require("render-markdown").toggle()
-end, desc("Toggle markdown render"))
-
--- ============================================================================
---  全局锁定（modlock）
--- ============================================================================
-
-require("config.modlock") -- 加载锁定模块
-
--- 模式锁定 <leader>ll：锁定后禁止一切修改，静默拦截无通知，状态栏显示 🔒
-map("n", "<leader>ll", function()
-    require("config.modlock").toggle()
-end, desc("Toggle global lock"))
+-- map("n", "<leader>rdm", function()
+--     require("render-markdown").toggle()
+-- end, desc("Toggle markdown render"))
 
 -- ============================================================================
 --  自定义快捷键可追加在此 ↓
--- ============================================================================
+-- ====================================================================================
 
 --  输入模式下光标移动
-map("i", "<A-h>", "<Left>", desc("Left"))
-map("i", "<A-l>", "<Right>", desc("Right"))
-map("i", "<A-j>", "<Down>", desc("Down"))
-map("i", "<A-k>", "<Up>", desc("Up"))
+-- map("i", "<A-h>", "<Left>", desc("Left"))
+-- map("i", "<A-l>", "<Right>", desc("Right"))
+-- map("i", "<A-j>", "<Down>", desc("Down"))
+-- map("i", "<A-k>", "<Up>", desc("Up"))
 
 --  输入模式下退格与删除快捷键
-map("i", "<C-x>", "<C-h>", desc("Delete char before cursor"))
-map("i", "<C-b>", "<Del>", desc("Delete char after cursor"))
+-- map("i", "<C-x>", "<C-h>", desc("Delete char before cursor"))
+-- map("i", "<C-b>", "<Del>", desc("Delete char after cursor"))

@@ -63,4 +63,6 @@ function M.close_all()
     end)
 end
 
+---（sync_buffer_order 已移除：nvim 无 API 直接重排内部 buffer 列表；改为让 bn/bp 用 bufferline.cycle 跟随视觉顺序）
+
 return M
