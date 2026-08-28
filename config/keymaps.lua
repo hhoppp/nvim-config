@@ -231,35 +231,10 @@ map("n", "<leader>Q", "<cmd>qa<cr>", desc("Quit all"))
 --  格式化 (conform.nvim)
 -- ============================================================================
 
--- map({ "n", "v" }, "<leader>cf", function()
---     require("conform").format({ async = true, lsp_fallback = true })
--- end, desc("Format code"))
---
--- map({ "n", "v" }, "<leader>cF", function()
---     require("conform").format({ formatters = { "injected" }, timeout_ms = 3000 })
--- end, desc("Format Injected Langs"))
-
 -- Shift+Alt+F 格式化（通用快捷键）
 map({ "n", "v", "i" }, "<A-S-f>", function()
     require("conform").format({ async = true, lsp_fallback = true })
 end, desc("Format code"))
-
--- ============================================================================
---  Git (gitsigns.nvim)
--- ============================================================================
-
--- map("n", "]c", function()
---     if vim.bo.buftype == "" and package.loaded.gitsigns then
---         package.loaded.gitsigns.next_hunk()
---     end
--- end, desc("Next hunk"))
---
--- map("n", "[c", function()
---     if vim.bo.buftype == "" and package.loaded.gitsigns then
---         package.loaded.gitsigns.prev_hunk()
---     end
--- end, desc("Prev hunk"))
-
 
 -- ============================================================================
 --  调试 (nvim-dap)
@@ -307,14 +282,6 @@ map("n", "gI", vim.lsp.buf.implementation, desc("Go to implementation"))
 
 -- 文档
 map("n", "K", vim.lsp.buf.hover, desc("Hover documentation"))
-
--- 重构
--- map("n", "<leader>ca", vim.lsp.buf.code_action, desc("Code actions"))
-
--- 格式化（LSP fallback，当 conform 不可用时）
--- map("n", "<leader>f", function()
---     vim.lsp.buf.format({ async = true })
--- end, desc("Format (LSP)"))
 
 -- ============================================================================
 --  诊断

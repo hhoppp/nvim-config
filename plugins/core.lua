@@ -8,6 +8,7 @@ return {
         "folke/tokyonight.nvim",
         lazy = false,
         priority = 1000,
+        -- event = "VimEnter",
         opts = {
             style = "night",
             transparent = true,
@@ -25,6 +26,7 @@ return {
         "xiyaowong/transparent.nvim",
         lazy = false,
         priority = 1001,
+        -- event = "VimEnter",
         opts = {
             enable = true, -- 启动自动透明
             extra_groups = {
@@ -113,7 +115,7 @@ return {
                     c = { bg = "NONE", fg = "#565f89" },
                 },
             }
-            
+
             require("lualine").setup({
                 options = {
                     theme = transparent_theme,
@@ -219,7 +221,7 @@ return {
                 offsets = {
                     { filetype = "NvimTree", text = "File Explorer", padding = 1 },
                 },
-                show_close_icon = false,
+                show_close_icon = true,
                 separator_style = "thin",
                 indicator = {
                     icon = "▎",
