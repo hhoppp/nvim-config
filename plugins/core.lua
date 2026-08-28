@@ -77,24 +77,56 @@ return {
 
     {
         "nvim-lualine/lualine.nvim",
-        event = "VimEnter",
+        event = "VeryLazy",  -- 改为 VeryLazy，确保在所有插件加载后初始化
         dependencies = { "nvim-tree/nvim-web-devicons", lazy = true },
         config = function()
-            local theme = require("lualine.themes.tokyonight")
-            for _, mode in pairs(theme) do
-                if type(mode) == "table" then
-                    for _, section in pairs(mode) do
-                        if type(section) == "table" and section.bg == "#1e2030" then
-                            section.bg = "NONE"
-                        end
-                    end
-                end
-            end
+            -- 创建一个完全透明的主题，避免闪烁
+            local transparent_theme = {
+                normal = {
+                    a = { bg = "NONE", fg = "#c0caf5" },
+                    b = { bg = "NONE", fg = "#c0caf5" },
+                    c = { bg = "NONE", fg = "#c0caf5" },
+                },
+                insert = {
+                    a = { bg = "NONE", fg = "#9ece6a" },
+                    b = { bg = "NONE", fg = "#c0caf5" },
+                    c = { bg = "NONE", fg = "#c0caf5" },
+                },
+                visual = {
+                    a = { bg = "NONE", fg = "#bb9af7" },
+                    b = { bg = "NONE", fg = "#c0caf5" },
+                    c = { bg = "NONE", fg = "#c0caf5" },
+                },
+                replace = {
+                    a = { bg = "NONE", fg = "#f7768e" },
+                    b = { bg = "NONE", fg = "#c0caf5" },
+                    c = { bg = "NONE", fg = "#c0caf5" },
+                },
+                command = {
+                    a = { bg = "NONE", fg = "#e0af68" },
+                    b = { bg = "NONE", fg = "#c0caf5" },
+                    c = { bg = "NONE", fg = "#c0caf5" },
+                },
+                inactive = {
+                    a = { bg = "NONE", fg = "#565f89" },
+                    b = { bg = "NONE", fg = "#565f89" },
+                    c = { bg = "NONE", fg = "#565f89" },
+                },
+            }
+            
             require("lualine").setup({
-                options = { theme = theme },
+                options = {
+                    theme = transparent_theme,
+                    section_separators = { left = '', right = '' },
+                    component_separators = { left = '', right = '' },
+                },
                 sections = {
-                    lualine_c = { { "filename", path = 1 } }, -- 显示相对路径
-
+                    lualine_a = { 'mode' },
+                    lualine_b = { 'branch', 'diff', 'diagnostics' },
+                    lualine_c = { { "filename", path = 1 } },
+                    lualine_x = { 'encoding', 'fileformat', 'filetype' },
+                    lualine_y = { 'progress' },
+                    lualine_z = { 'location' },
                 },
             })
         end,

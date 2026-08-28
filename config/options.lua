@@ -1,6 +1,35 @@
 -- 透明背景：在所有插件加载前设置，消除启动闪烁
 vim.api.nvim_set_hl(0, "Normal", { bg = "NONE" })
 
+-- 预设 LuaLine 和其他 UI 组为透明，防止加载时闪烁
+vim.defer_fn(function()
+    -- 基础 UI 组
+    local ui_groups = {
+        "StatusLine", "StatusLineNC",
+        "TabLine", "TabLineFill", "TabLineSel",
+        "WinSeparator", "VertSplit",
+        "Pmenu", "PmenuSel", "PmenuSbar", "PmenuThumb",
+    }
+    for _, g in ipairs(ui_groups) do
+        pcall(vim.api.nvim_set_hl, 0, g, { bg = "NONE" })
+    end
+
+    -- LuaLine 高亮组
+    local lualine_prefixes = {
+        "lualine_a_", "lualine_b_", "lualine_c_",
+        "lualine_x_", "lualine_y_", "lualine_z_"
+    }
+    local lualine_modes = {
+        "normal", "insert", "visual", "replace",
+        "command", "inactive"
+    }
+    for _, prefix in ipairs(lualine_prefixes) do
+        for _, mode in ipairs(lualine_modes) do
+            pcall(vim.api.nvim_set_hl, 0, prefix .. mode, { bg = "NONE" })
+        end
+    end
+end, 0)  -- 延迟 0ms，在当前事件循环结束后执行
+
 -- ============================================================================
 --  1. 缩写与别名
 -- ============================================================================
