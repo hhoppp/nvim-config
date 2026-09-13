@@ -14,9 +14,8 @@ return {
       -- 绝对路径（插件要求）
       cf_path = vim.fn.expand("~/Documents/code/codeforces"),
 
-      -- 没装 Xvfb 时保持 true：抓题会短暂弹出 Chromium 窗口（更可靠）
-      -- 装了 Xvfb 后改成 false：改用虚拟显示，不再弹窗
-      use_native_display = true ,
+      -- Xvfb 已安装（xorg-server-xvfb），用虚拟显示抓题，不再弹出 Chromium 窗口
+      use_native_display = false,
 
       extension = "cpp",
       timeout = 15000,
