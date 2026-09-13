@@ -6,7 +6,7 @@ return {
   "yunusey/codeforces-nvim",
   dependencies = {
     "nvim-lua/plenary.nvim",
-    "akinsho/toggleterm.nvim",
+    -- 不用 toggleterm：本插件自己管理运行窗口，见下方 run_in_window
   },
   -- 不用 cmd/event 懒加载，保证命令一定被注册
   config = function()
@@ -19,7 +19,9 @@ return {
 
       extension = "cpp",
       timeout = 15000,
-      use_term_toggle = true,
+
+      -- 已不用 toggleterm
+      use_term_toggle = false,
 
       compiler = { cpp = { "g++", "@.cpp", "-o", "@", "-std=c++17" } },
       run = { cpp = { "@" } },
@@ -27,17 +29,24 @@ return {
       -- 打开模板后光标落点：对应 template.cpp 中 solve() 的空行
       -- 若你以后改模板，需要同步这个行号
       lines = { cpp = 5 },
+
+      -- 插件默认把 success 也当成 WARN 发，导致"编译成功/样例通过"也弹警告
+      -- 这里改成：success -> INFO，error -> ERROR
+      notify = function(title, message, type)
+        local level = type == "success" and vim.log.levels.INFO or vim.log.levels.ERROR
+        vim.notify(message and (title .. "\n" .. message) or title, level)
+      end,
     })
 
     -- ============================================================
-    -- 个性化覆盖：:EnterContest / :QNext 不再新开 tab，
-    -- 而是在当前窗口打开并聚焦 buffer。
-    -- 放在这里覆盖而非改插件源码 —— :Lazy update 不会丢失。
+    -- 个性化覆盖。放在 config 里覆盖而非改插件源码，
+    -- 这样 :Lazy update 不会丢失。
     -- 原理：插件的命令回调是"调用时查表"（codeforces.enter_contest /
-    -- M.next_question），所以替换模块表上的函数即可生效。
+    -- M.next_question / commands.run_normally），替换模块表上的函数即可生效。
     -- ============================================================
     local cf = require("codeforces-nvim.codeforces")
     local uc = require("codeforces-nvim.user_commands")
+    local cmds = require("codeforces-nvim.commands")
 
     --- 把 path 打开到当前窗口并聚焦。
     --- 若该文件已显示在某个窗口，则直接聚焦那个窗口（不重复打开）。
@@ -103,6 +112,78 @@ return {
       local solution_file = cf.get_solution_file(cf.problems[cf.current_problem], cf.options.extension)
       focus_file(solution_file)
       vim.api.nvim_win_set_cursor(0, { cf.options.lines[cf.options.extension], 0 })
+    end
+
+    -- ============================================================
+    -- 运行窗口：不用 toggleterm。
+    -- 一个固定窗口 + 每次新建的终端 buffer，不开新 tab、不弹浮窗。
+    -- 在窗口里按 q 关闭；按 Esc 从终端模式回到普通模式。
+    -- ============================================================
+    local run_win = nil
+
+    --- @param cmd string 要在终端里执行的 shell 命令
+    local function run_in_window(cmd)
+      if run_win and vim.api.nvim_win_is_valid(run_win) then
+        vim.api.nvim_set_current_win(run_win)
+      else
+        -- 在当前 tab 底部开一个窗口（绝不是新 tab）
+        vim.cmd("botright split")
+        run_win = vim.api.nvim_get_current_win()
+      end
+
+      -- 用全新 scratch buffer，避免 enew 在文件有未保存改动时报 E37
+      local buf = vim.api.nvim_create_buf(false, true)
+      vim.api.nvim_win_set_buf(run_win, buf)
+      -- 切走时自动 wipe，顺带结束上一个终端进程
+      vim.bo[buf].bufhidden = "wipe"
+      vim.fn.termopen(cmd)
+      vim.cmd("startinsert")
+
+      -- q 关闭运行窗口
+      vim.keymap.set("n", "q", function()
+        if run_win and vim.api.nvim_win_is_valid(run_win) then
+          vim.api.nvim_win_close(run_win, true)
+        end
+      end, { buffer = true, desc = "Close run window" })
+
+      -- 终端模式下 Esc 回到普通模式（否则 Esc 会被送给程序）
+      vim.keymap.set("t", "<Esc>", [[<C-\><C-n>]], { buffer = true, desc = "Terminal normal mode" })
+    end
+
+    --- 把插件里的 @（当前题目）展开成实际路径
+    --- @param problem string
+    --- @param t string[]
+    local function expand_at(problem, t)
+      local exe = cf.get_solution_file(problem, nil)
+      return vim.tbl_map(function(s)
+        return (s:gsub("@", exe))
+      end, t)
+    end
+
+    --- 覆盖 :RunCurrent
+    cmds.run_normally = function(problem)
+      local compiler = expand_at(problem, cf.options.compiler[cf.options.extension] or {})
+      local function run()
+        run_in_window(table.concat(expand_at(problem, cf.options.run[cf.options.extension] or {}), " "))
+      end
+
+      if #compiler > 0 then
+        cmds.compile(compiler, run)
+      else
+        run()
+      end
+    end
+
+    --- 覆盖 :RetrieveLastTestCase（以及 :CreateTestCase 里回车触发的运行）
+    cmds.run_custom_test = function(problem)
+      local input = vim.fs.joinpath(
+        cf.paths.solutions,
+        cf.get_current_contest(),
+        string.format("custom-%s.in", problem)
+      )
+      run_in_window(
+        table.concat(expand_at(problem, cf.options.run[cf.options.extension] or {}), " ") .. " < " .. input
+      )
     end
   end,
 }
