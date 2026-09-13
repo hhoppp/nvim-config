@@ -185,5 +185,49 @@ return {
         table.concat(expand_at(problem, cf.options.run[cf.options.extension] or {}), " ") .. " < " .. input
       )
     end
+
+    -- ============================================================
+    -- 覆盖样例失败时的 diff：用当前 tab 的窗口，而不是 :tabnew
+    -- 两个窗口都绑定 q 关闭
+    -- ============================================================
+    cmds.handle_differences = function(errors)
+      local user_output_content = {}
+      local expected_output_content = {}
+      for _, i in pairs(errors) do
+        local test_case = i[1]
+        table.insert(user_output_content, "Test Case: " .. test_case)
+        table.insert(expected_output_content, "Test Case: " .. test_case)
+        for _, j in pairs(i[2] or {}) do
+          table.insert(user_output_content, j)
+        end
+        for _, j in pairs(i[3] or {}) do
+          table.insert(expected_output_content, j)
+        end
+      end
+
+      local user_file = vim.fn.tempname()
+      local expected_file = vim.fn.tempname()
+      vim.fn.writefile(user_output_content, user_file)
+      vim.fn.writefile(expected_output_content, expected_file)
+
+      -- 在当前 tab 底部开窗口（不是新 tab），再纵向 diff
+      vim.cmd("botright split " .. vim.fn.fnameescape(user_file))
+      vim.cmd("vert diffsplit " .. vim.fn.fnameescape(expected_file))
+
+      --- 关闭当前窗口；若是本 tab 最后一个窗口则留一个空 buffer
+      local function close_win()
+        if #vim.api.nvim_tabpage_list_wins(0) > 1 then
+          vim.api.nvim_win_close(0, false)
+        else
+          vim.cmd("enew")
+        end
+      end
+
+      for _, b in ipairs({ vim.fn.bufnr(user_file), vim.fn.bufnr(expected_file) }) do
+        if b > 0 then
+          vim.keymap.set("n", "q", close_win, { buffer = b, desc = "Close diff window" })
+        end
+      end
+    end
   end,
 }
