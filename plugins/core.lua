@@ -79,7 +79,7 @@ return {
 
     {
         "nvim-lualine/lualine.nvim",
-        event = "VeryLazy",  -- 改为 VeryLazy，确保在所有插件加载后初始化
+        event = "VeryLazy", -- 改为 VeryLazy，确保在所有插件加载后初始化
         dependencies = { "nvim-tree/nvim-web-devicons", lazy = true },
         config = function()
             -- 创建一个完全透明的主题，避免闪烁
@@ -135,83 +135,83 @@ return {
     },
 
     -- 启动仪表板
-    {
-        "goolord/alpha-nvim",
-        event = "VimEnter",
-        enabled = true,
-        init = false,
-        opts = function()
-            local dashboard = require("alpha.themes.dashboard")
-            local logo = [[
-      ██╗      █████╗ ███████╗██╗   ██╗██╗   ██╗██╗███╗   ███╗          Z
-      ██║     ██╔══██╗╚══███╔╝╚██╗ ██╔╝██║   ██║██║████╗ ████║      Z
-      ██║     ███████║  ███╔╝  ╚████╔╝ ██║   ██║██║██╔████╔██║   z
-      ██║     ██╔══██║ ███╔╝    ╚██╔╝  ╚██╗ ██╔╝██║██║╚██╔╝██║ z
-      ███████╗██║  ██║███████╗   ██║    ╚████╔╝ ██║██║ ╚═╝ ██║
-      ╚══════╝╚═╝  ╚═╝╚══════╝   ╚═╝     ╚═══╝  ╚═╝╚═╝     ╚═╝
-    ]]
-
-            dashboard.section.header.val = vim.split(logo, "\n")
-            -- stylua: ignore
-            dashboard.section.buttons.val = {
-                dashboard.button("f", " " .. " Find file", "<cmd>Telescope find_files<cr>"),
-                dashboard.button("n", " " .. " New file", [[<cmd> ene <BAR> startinsert <cr>]]),
-                dashboard.button("r", " " .. " Recent files", [[<cmd>Telescope oldfiles<cr>]]),
-                dashboard.button("b", " " .. " Buffers", [[<cmd>Telescope buffers<cr>]]),
-                dashboard.button("g", " " .. " Find text", [[<cmd>Telescope live_grep<cr>]]),
-                dashboard.button("c", " " .. " Config", "<cmd>e ~/.config/nvim/init.lua<cr>"),
-                dashboard.button("m", "󰏖 " .. " Mason", [[<cmd>Mason<cr>]]),
-                dashboard.button("l", "󰒲 " .. " Lazy", "<cmd>Lazy<cr>"),
-                dashboard.button("q", " " .. " Quit", "<cmd>qa<cr>"),
-            }
-            for _, button in ipairs(dashboard.section.buttons.val) do
-                button.opts.hl = "AlphaButtons"
-                button.opts.hl_shortcut = "AlphaShortcut"
-            end
-            dashboard.section.header.opts.hl = "AlphaHeader"
-            dashboard.section.buttons.opts.hl = "AlphaButtons"
-            dashboard.section.footer.opts.hl = "AlphaFooter"
-            dashboard.opts.layout[1].val = 8
-            return dashboard
-        end,
-        config = function(_, dashboard)
-            -- close Lazy and re-open when the dashboard is ready
-            if vim.o.filetype == "lazy" then
-                vim.cmd.close()
-                vim.api.nvim_create_autocmd("User", {
-                    once = true,
-                    pattern = "AlphaReady",
-                    callback = function()
-                        require("lazy").show()
-                    end,
-                })
-            end
-
-            require("alpha").setup(dashboard.opts)
-
-            vim.api.nvim_create_autocmd("User", {
-                once = true,
-                pattern = "LazyVimStarted",
-                callback = function()
-                    local stats = require("lazy").stats()
-                    local ms = (math.floor(stats.startuptime * 100 + 0.5) / 100)
-                    dashboard.section.footer.val = "⚡ Neovim loaded "
-                        .. stats.loaded
-                        .. "/"
-                        .. stats.count
-                        .. " plugins in "
-                        .. ms
-                        .. "ms"
-                    pcall(vim.cmd.AlphaRedraw)
-                end,
-            })
-        end,
-    },
+    -- {
+    --     "goolord/alpha-nvim",
+    --     event = "VimEnter",
+    --     enabled = true,
+    --     init = false,
+    --     opts = function()
+    --         local dashboard = require("alpha.themes.dashboard")
+    --         local logo = [[
+    --   ██╗      █████╗ ███████╗██╗   ██╗██╗   ██╗██╗███╗   ███╗          Z
+    --   ██║     ██╔══██╗╚══███╔╝╚██╗ ██╔╝██║   ██║██║████╗ ████║      Z
+    --   ██║     ███████║  ███╔╝  ╚████╔╝ ██║   ██║██║██╔████╔██║   z
+    --   ██║     ██╔══██║ ███╔╝    ╚██╔╝  ╚██╗ ██╔╝██║██║╚██╔╝██║ z
+    --   ███████╗██║  ██║███████╗   ██║    ╚████╔╝ ██║██║ ╚═╝ ██║
+    --   ╚══════╝╚═╝  ╚═╝╚══════╝   ╚═╝     ╚═══╝  ╚═╝╚═╝     ╚═╝
+    -- ]]
+    --
+    --         dashboard.section.header.val = vim.split(logo, "\n")
+    --         -- stylua: ignore
+    --         dashboard.section.buttons.val = {
+    --             dashboard.button("f", " " .. " Find file", "<cmd>Telescope find_files<cr>"),
+    --             dashboard.button("n", " " .. " New file", [[<cmd> ene <BAR> startinsert <cr>]]),
+    --             dashboard.button("r", " " .. " Recent files", [[<cmd>Telescope oldfiles<cr>]]),
+    --             dashboard.button("b", " " .. " Buffers", [[<cmd>Telescope buffers<cr>]]),
+    --             dashboard.button("g", " " .. " Find text", [[<cmd>Telescope live_grep<cr>]]),
+    --             dashboard.button("c", " " .. " Config", "<cmd>e ~/.config/nvim/init.lua<cr>"),
+    --             dashboard.button("m", "󰏖 " .. " Mason", [[<cmd>Mason<cr>]]),
+    --             dashboard.button("l", "󰒲 " .. " Lazy", "<cmd>Lazy<cr>"),
+    --             dashboard.button("q", " " .. " Quit", "<cmd>qa<cr>"),
+    --         }
+    --         for _, button in ipairs(dashboard.section.buttons.val) do
+    --             button.opts.hl = "AlphaButtons"
+    --             button.opts.hl_shortcut = "AlphaShortcut"
+    --         end
+    --         dashboard.section.header.opts.hl = "AlphaHeader"
+    --         dashboard.section.buttons.opts.hl = "AlphaButtons"
+    --         dashboard.section.footer.opts.hl = "AlphaFooter"
+    --         dashboard.opts.layout[1].val = 8
+    --         return dashboard
+    --     end,
+    --     config = function(_, dashboard)
+    --         -- close Lazy and re-open when the dashboard is ready
+    --         if vim.o.filetype == "lazy" then
+    --             vim.cmd.close()
+    --             vim.api.nvim_create_autocmd("User", {
+    --                 once = true,
+    --                 pattern = "AlphaReady",
+    --                 callback = function()
+    --                     require("lazy").show()
+    --                 end,
+    --             })
+    --         end
+    --
+    --         require("alpha").setup(dashboard.opts)
+    --
+    --         vim.api.nvim_create_autocmd("User", {
+    --             once = true,
+    --             pattern = "LazyVimStarted",
+    --             callback = function()
+    --                 local stats = require("lazy").stats()
+    --                 local ms = (math.floor(stats.startuptime * 100 + 0.5) / 100)
+    --                 dashboard.section.footer.val = "⚡ Neovim loaded "
+    --                     .. stats.loaded
+    --                     .. "/"
+    --                     .. stats.count
+    --                     .. " plugins in "
+    --                     .. ms
+    --                     .. "ms"
+    --                 pcall(vim.cmd.AlphaRedraw)
+    --             end,
+    --         })
+    --     end,
+    -- },
 
     -- Buffer 标签栏（VSCode 风格）
     {
         "akinsho/bufferline.nvim",
-        event = "VimEnter",
+        event = "VeryLazy",
         version = "*",
         dependencies = { "nvim-tree/nvim-web-devicons" },
         opts = {
@@ -232,6 +232,20 @@ return {
                 -- 避免 bdelete 把 nvim-tree 窗口挤掉
                 close_command = function(buf)
                     require("config.bufops").close_buffer_safe(buf)
+                end,
+                custom_filter = function(buf_number)
+                    -- 1. 如果 buffer 有名字，直接显示
+                    if vim.api.nvim_buf_get_name(buf_number) ~= "" then
+                        return true
+                    end
+
+                    -- 2. 如果没有名字，但 buffer 被修改过（有未保存的内容），依然显示
+                    -- if vim.api.nvim_buf_get_option(buf_number, "modified") then
+                    --     return true
+                    -- end
+
+                    -- 3. 完全没有名字且没有内容的空 buffer，隐藏
+                    return false
                 end,
             },
         },
@@ -323,7 +337,7 @@ return {
                 unchecked = { icon = "󰄱", highlight = "RenderMarkdownUnchecked" },
                 checked   = { icon = "󰱒", highlight = "RenderMarkdownChecked" },
                 -- 复选框左侧内边距
-                left_pad = 2,
+                left_pad  = 2,
                 right_pad = 2,
             },
 
@@ -357,20 +371,6 @@ return {
             --     enabled = false,
             -- },
 
-            -- ===== 链接/图片渲染 =====
-            link = {
-                -- 超链接显示图标
-                icon = "󰌹",
-                -- 图片链接显示图标
-                image_icon = "󰉋",
-                -- 是否加下划线
-                underline = true,
-                -- 是否在链接后显示括号中的 URL
-                -- show_url = false,
-                -- 左侧内边距
-                left_pad = 2,
-                right_pad = 2,
-            },
 
             -- ===== 分隔线 =====
             dash = {
@@ -405,18 +405,18 @@ return {
             -- ===== Obsidian callout 图标化（参考 patricorgi/dotfiles）=====
             -- 知识库常用的 callout 类型映射为图标 + 语义色
             callout = {
-                note      = { raw = "[!NOTE]",      rendered = "󰋽 Note",      highlight = "RenderMarkdownInfo" },
-                tip       = { raw = "[!TIP]",       rendered = "󰌶 Tip",       highlight = "RenderMarkdownSuccess" },
+                note      = { raw = "[!NOTE]", rendered = "󰋽 Note", highlight = "RenderMarkdownInfo" },
+                tip       = { raw = "[!TIP]", rendered = "󰌶 Tip", highlight = "RenderMarkdownSuccess" },
                 important = { raw = "[!IMPORTANT]", rendered = "󰅾 Important", highlight = "RenderMarkdownHint" },
-                warning   = { raw = "[!WARNING]",   rendered = "󰀪 Warning",   highlight = "RenderMarkdownWarn" },
-                caution   = { raw = "[!CAUTION]",   rendered = "󰳦 Caution",   highlight = "RenderMarkdownError" },
+                warning   = { raw = "[!WARNING]", rendered = "󰀪 Warning", highlight = "RenderMarkdownWarn" },
+                caution   = { raw = "[!CAUTION]", rendered = "󰳦 Caution", highlight = "RenderMarkdownError" },
             },
 
             -- ===== wikilink 高亮（[[文件名]]，配合 marksman 跳转）=====
-            -- 用 conceal 隐藏括号、给链接着色，观感接近 Obsidian 阅读模式
+            -- link 渲染在当前版本有 bug（E731: Dictionary as String），暂禁用
+            -- 链接仍通过 conceal 隐藏括号，仅去掉自定义图标渲染
             link = {
-                hyperlink = { icon = "󰌹" },
-                image     = { icon = "󰉋" },
+                enabled = false,
             },
         },
         -- 可选：自定义高亮组覆盖（适配 tokyonight 主题）
@@ -425,13 +425,23 @@ return {
 
             -- 适配透明背景：将渲染高亮组背景设为 NONE
             -- 如果你使用了 transparent.nvim，推荐启用以下设置
-            vim.api.nvim_set_hl(0, "RenderMarkdownCode",       { bg = "NONE" })
+            vim.api.nvim_set_hl(0, "RenderMarkdownCode", { bg = "NONE" })
             vim.api.nvim_set_hl(0, "RenderMarkdownCodeInline", { bg = "NONE" })
         end,
     },
 
     -- 文件图标 (让文件树、状态栏等显示图标)
     { "nvim-tree/nvim-web-devicons", lazy = true },
+
+    -- Markdown 图片内联显示（通过 Kitty graphics protocol）
+    {
+        "3rd/image.nvim",
+        ft = { "markdown" },
+        opts = {
+            backend = "kitty",  -- 使用 Kitty 终端 graphics protocol
+            integrations = {},
+        },
+    },
 
     -- 快捷键提示（按 leader 后弹出，Helix 风格右下角）
     {
@@ -460,6 +470,7 @@ return {
     -- 终端管理器
     {
         "akinsho/toggleterm.nvim",
+        event = "VeryLazy",
         cmd = { "ToggleTerm", "TermExec", "TermSelect" },
         opts = {
             size = 20,
@@ -483,6 +494,7 @@ return {
     -- 通知美化
     {
         "rcarriga/nvim-notify",
+        event = "VeryLazy",
         opts = {
             background_colour = "#000000",
             timeout = 3000,
@@ -610,6 +622,7 @@ return {
     -- ======== 调试器 nvim-dap ========
     {
         "mfussenegger/nvim-dap",
+        event = "VeryLazy",
         dependencies = {
             { "rcarriga/nvim-dap-ui", dependencies = { "nvim-neotest/nvim-nio" } },
         },
@@ -738,7 +751,7 @@ return {
     {
         "saghen/blink.cmp",
         version = "1.*",    -- 锁定主版本，避免破坏性更新
-        event = "VimEnter", -- Vim启动后加载
+        event = "VeryLazy", -- Vim启动后加载
         build = function()
             -- 可选：启用 Rust fuzzy 匹配器需要构建
             -- 如果不想构建，保持 fuzzy.implementation = "lua" 即可
@@ -1086,7 +1099,7 @@ return {
             vim.lsp.enable("clangd")
             vim.lsp.enable("lua_ls")
             vim.lsp.enable("pyright")
-            vim.lsp.enable("ts_ls")
+            -- vim.lsp.enable("ts_ls")
             vim.lsp.enable("marksman")
 
             -- ===== 诊断显示配置 =====
