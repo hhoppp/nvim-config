@@ -194,9 +194,9 @@ end, desc("Close all buffers"))
 -- ============================================================================
 --  快速保存 / 退出
 -- ============================================================================
--- map("n", "<leader>w", "<cmd>write<cr>", desc("Save"))
--- map("n", "<leader>q", "<cmd>quit<cr>", desc("Quit"))
--- map("n", "<leader>Q", "<cmd>qa<cr>", desc("Quit all"))
+map("n", "<leader>w", "<cmd>write<cr>", desc("Save"))
+map("n", "<leader>q", "<cmd>quit<cr>", desc("Quit"))
+map("n", "<leader>Q", "<cmd>qa<cr>", desc("Quit all"))
 -- map("n", "<leader>x", "<cmd>x<cr>", desc("Save and quit"))
 
 -- ============================================================================
@@ -204,15 +204,27 @@ end, desc("Close all buffers"))
 -- ============================================================================
 
 -- Ctrl+S 保存（插入模式）
--- map("i", "<C-s>", function()
---     if vim.bo.modified then vim.cmd.write() end
--- end, desc("Save"))
+map("i", "<C-s>", function()
+    if vim.bo.modified then vim.cmd.write() end
+end, desc("Save"))
 
 -- Ctrl+V 粘贴（插入模式，从系统剪贴板）
--- map("i", "<C-v>", "<C-r>+", desc("Paste"))
+-- map("i", "<C-S-v>", "<C-r>+", desc("Paste"))
 
 -- Ctrl+Z 撤销（插入模式，退出插入模式执行撤销）
--- map("i", "<C-z>", "<Esc>ui", desc("Undo"))
+-- map("i", "<C-S-z>", "<C-o>u", desc("Undo"))
+
+-- Ctrl+R 重做（插入模式，redo）
+-- map("i", "<C-S-r>", "<C-o><C-r>", desc("Redo"))
+
+-- Ctrl+/ 注释（插入模式）
+-- map("i", "<C-/>", "<Esc>gcc", desc("Comment"))
+
+-- Ctrl+; cmd
+-- map("i", "<C-;>", "<C-o>:", desc("Cmd"))
+
+-- Ctrl+q
+map("i", "<C-q>", "<Esc>ZQ", desc("Exit"))
 
 -- Ctrl+E 关闭（插入模式）
 -- map("i", "<C-e>", "<Esc>a", desc("Hide"))
@@ -338,11 +350,12 @@ end, desc("Next (warn/error)"))
 -- ====================================================================================
 
 --  输入模式下光标移动
--- map("i", "<A-h>", "<Left>", desc("Left"))
--- map("i", "<A-l>", "<Right>", desc("Right"))
--- map("i", "<A-j>", "<Down>", desc("Down"))
--- map("i", "<A-k>", "<Up>", desc("Up"))
+map("i", "<C-b>", "<Left>", desc("Left"))
+map("i", "<C-f>", "<Right>", desc("Right"))
+map("i", "<C-n>", "<Down>", desc("Down"))
+map("i", "<C-p>", "<Up>", desc("Up"))
+map("i", "<A-f>", "<C-o>w", desc("forward"))
+map("i", "<A-b>", "<C-o>b", desc("backward"))
 
 --  输入模式下退格与删除快捷键
--- map("i", "<C-x>", "<C-h>", desc("Delete char before cursor"))
--- map("i", "<C-b>", "<Del>", desc("Delete char after cursor"))
+map("i", "<C-d>", "<Del>", desc("Delete char after cursor"))

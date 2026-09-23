@@ -10,5 +10,7 @@ return {
     vim.g["cph#border"] = "rounded"
     vim.g["cph#vsplit"] = true
     vim.g["cph#cpp#compile_command"] = { "g++", "solution.cpp", "-o", "cpp.out", "-std=c++17" }
+    vim.g["cph#template"] = vim.fn.expand("~/.cf/t.cpp")
+    vim.g["cph#cursor"] = 5
   end,
 }
