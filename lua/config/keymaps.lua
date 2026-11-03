@@ -227,7 +227,7 @@ end, desc("Save"))
 map("i", "<C-q>", "<Esc>ZQ", desc("Exit"))
 
 -- Ctrl+E 关闭（插入模式）
--- map("i", "<C-e>", "<Esc>a", desc("Hide"))
+map("i", "<C-e>", "<Esc>A", desc("End"))
 
 -- 注释切换 (gc/gcc) — Neovim 内置注释（详见 :help gcc）
 -- 包围符号 (ys/cs/ds) — 定义在 plugins/core.lua nvim-surround 中（同上）
